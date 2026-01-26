@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, TrendingUp, CreditCard, DollarSign, FileText, BarChart3, CheckCircle2 } from "lucide-react"
+import { CalendarIcon, TrendingUp, CreditCard, DollarSign, FileText, BarChart3, CheckCircle2, Plus, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const expenseCategories = [
@@ -85,6 +85,70 @@ const ExpenseTracker = () => {
     setCreditCardExpense({ ExpenseOn: "", ExpenseDate: undefined, ExpenseAmount: "" })
   }
 
+  const handleDeleteCreditCardExpense = (index: number) => {
+    setCreditCardExpenses((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDuplicateCreditCardExpense = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setCreditCardExpenses((prev) => [
+      ...prev.slice(0, index + 1),
+      { ...expense },
+      ...prev.slice(index + 1),
+    ])
+  }
+
+  const handleAddOtherExpenseFromCreditCard = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setOtherExpenses((prev) => [
+      ...prev,
+      {
+        OtherExpense: expense.ExpenseOn,
+        OtherExpenseDate: expense.ExpenseDate,
+        OtherPayment: expense.ExpenseAmount,
+      },
+    ])
+  }
+
+  const handleAddRepaymentFromCreditCard = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setRepayments((prev) => [
+      ...prev,
+      {
+        RepayDate: expense.ExpenseDate,
+        RepayAmount: expense.ExpenseAmount,
+      },
+    ])
+  }
+
+  const handleAddChitPaymentFromCreditCard = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setChitPayments((prev) => [
+      ...prev,
+      {
+        ChitDate: expense.ExpenseDate,
+        ChitPayment: expense.ExpenseAmount,
+      },
+    ])
+  }
+
+  // Other Expense Handlers (with date)
+  const handleAddOtherExpense = () => {
+    if (!otherExpense.OtherExpense || !otherExpense.OtherExpenseDate || !otherExpense.OtherPayment) {
+      alert("Please fill in all fields for Other Expense")
+      return
+    }
+    setOtherExpenses((prev) => [
+      ...prev,
+      {
+        OtherExpense: otherExpense.OtherExpense,
+        OtherExpenseDate: formatDate(otherExpense.OtherExpenseDate),
+        OtherPayment: otherExpense.OtherPayment,
+      },
+    ])
+    setOtherExpense({ OtherExpense: "", OtherExpenseDate: undefined, OtherPayment: "" })
+  }
+
   // Repayment Handlers
   const handleAddRepayment = () => {
     if (!repayment.RepayDate || !repayment.RepayAmount) {
@@ -117,21 +181,17 @@ const ExpenseTracker = () => {
     setChitPayment({ ChitDate: undefined, ChitPayment: "" })
   }
 
-  // Other Expense Handlers (with date)
-  const handleAddOtherExpense = () => {
-    if (!otherExpense.OtherExpense || !otherExpense.OtherExpenseDate || !otherExpense.OtherPayment) {
-      alert("Please fill in all fields for Other Expense")
-      return
-    }
-    setOtherExpenses((prev) => [
-      ...prev,
-      {
-        OtherExpense: otherExpense.OtherExpense,
-        OtherExpenseDate: formatDate(otherExpense.OtherExpenseDate),
-        OtherPayment: otherExpense.OtherPayment,
-      },
-    ])
-    setOtherExpense({ OtherExpense: "", OtherExpenseDate: undefined, OtherPayment: "" })
+  // Delete Handlers
+  const handleDeleteOtherExpense = (index: number) => {
+    setOtherExpenses((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDeleteRepayment = (index: number) => {
+    setRepayments((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDeleteChit = (index: number) => {
+    setChitPayments((prev) => prev.filter((_, i) => i !== index))
   }
 
   // Submit All Data
@@ -384,6 +444,7 @@ const ExpenseTracker = () => {
                           <TableHead className="font-bold text-gray-700">Expense On</TableHead>
                           <TableHead className="font-bold text-gray-700">Date</TableHead>
                           <TableHead className="font-bold text-gray-700">Amount</TableHead>
+                          <TableHead className="font-bold text-gray-700 text-center">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -393,6 +454,49 @@ const ExpenseTracker = () => {
                             <TableCell className="text-sm">{expense.ExpenseDate}</TableCell>
                             <TableCell className="text-sm font-semibold text-purple-600">
                               ₹{expense.ExpenseAmount}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex gap-1 justify-center flex-wrap">
+                                <div className="relative group">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-green-600 hover:bg-green-100"
+                                    title="Add expense"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                  <div className="absolute left-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 hidden group-hover:block">
+                                    <button
+                                      onClick={() => handleAddOtherExpenseFromCreditCard(index)}
+                                      className="block w-full text-left px-3 py-2 text-sm hover:bg-green-50 rounded-t-lg first:rounded-t-lg"
+                                    >
+                                      Add Other
+                                    </button>
+                                    <button
+                                      onClick={() => handleAddRepaymentFromCreditCard(index)}
+                                      className="block w-full text-left px-3 py-2 text-sm hover:bg-green-50"
+                                    >
+                                      Add Repay
+                                    </button>
+                                    <button
+                                      onClick={() => handleAddChitPaymentFromCreditCard(index)}
+                                      className="block w-full text-left px-3 py-2 text-sm hover:bg-green-50 rounded-b-lg"
+                                    >
+                                      Add Chit
+                                    </button>
+                                  </div>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteCreditCardExpense(index)}
+                                  className="text-red-600 hover:bg-red-100"
+                                  title="Delete row"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -486,6 +590,7 @@ const ExpenseTracker = () => {
                           <TableHead className="font-bold text-gray-700">Description</TableHead>
                           <TableHead className="font-bold text-gray-700">Date</TableHead>
                           <TableHead className="font-bold text-gray-700">Amount</TableHead>
+                          <TableHead className="font-bold text-gray-700 text-center">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -495,6 +600,19 @@ const ExpenseTracker = () => {
                             <TableCell className="text-sm">{expense.OtherExpenseDate}</TableCell>
                             <TableCell className="text-sm font-semibold text-orange-600">
                               ₹{expense.OtherPayment}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex gap-2 justify-center">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteOtherExpense(index)}
+                                  className="text-red-600 hover:bg-red-100"
+                                  title="Delete row"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -573,6 +691,7 @@ const ExpenseTracker = () => {
                         <TableRow>
                           <TableHead className="font-bold text-gray-700">Date</TableHead>
                           <TableHead className="font-bold text-gray-700">Amount</TableHead>
+                          <TableHead className="font-bold text-gray-700 text-center">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -581,6 +700,19 @@ const ExpenseTracker = () => {
                             <TableCell className="text-sm">{payment.RepayDate}</TableCell>
                             <TableCell className="text-sm font-semibold text-blue-600">
                               ₹{payment.RepayAmount}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex gap-2 justify-center">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteRepayment(index)}
+                                  className="text-red-600 hover:bg-red-100"
+                                  title="Delete row"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
@@ -659,6 +791,7 @@ const ExpenseTracker = () => {
                         <TableRow>
                           <TableHead className="font-bold text-gray-700">Date</TableHead>
                           <TableHead className="font-bold text-gray-700">Amount</TableHead>
+                          <TableHead className="font-bold text-gray-700 text-center">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -667,6 +800,19 @@ const ExpenseTracker = () => {
                             <TableCell className="text-sm">{payment.ChitDate}</TableCell>
                             <TableCell className="text-sm font-semibold text-indigo-600">
                               ₹{payment.ChitPayment}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex gap-2 justify-center">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteChit(index)}
+                                  className="text-red-600 hover:bg-red-100"
+                                  title="Delete row"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
