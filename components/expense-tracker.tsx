@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { CalendarIcon, TrendingUp, CreditCard, DollarSign, FileText, BarChart3, CheckCircle2 } from "lucide-react"
+import { CalendarIcon, TrendingUp, CreditCard, DollarSign, FileText, BarChart3, CheckCircle2, Plus, Trash2 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const expenseCategories = [
@@ -83,6 +83,19 @@ const ExpenseTracker = () => {
       },
     ])
     setCreditCardExpense({ ExpenseOn: "", ExpenseDate: undefined, ExpenseAmount: "" })
+  }
+
+  const handleDeleteCreditCardExpense = (index: number) => {
+    setCreditCardExpenses((prev) => prev.filter((_, i) => i !== index))
+  }
+
+  const handleDuplicateCreditCardExpense = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setCreditCardExpenses((prev) => [
+      ...prev.slice(0, index + 1),
+      { ...expense },
+      ...prev.slice(index + 1),
+    ])
   }
 
   // Repayment Handlers
@@ -384,6 +397,7 @@ const ExpenseTracker = () => {
                           <TableHead className="font-bold text-gray-700">Expense On</TableHead>
                           <TableHead className="font-bold text-gray-700">Date</TableHead>
                           <TableHead className="font-bold text-gray-700">Amount</TableHead>
+                          <TableHead className="font-bold text-gray-700 text-center">Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -393,6 +407,28 @@ const ExpenseTracker = () => {
                             <TableCell className="text-sm">{expense.ExpenseDate}</TableCell>
                             <TableCell className="text-sm font-semibold text-purple-600">
                               ₹{expense.ExpenseAmount}
+                            </TableCell>
+                            <TableCell className="text-sm">
+                              <div className="flex gap-2 justify-center">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDuplicateCreditCardExpense(index)}
+                                  className="text-green-600 hover:bg-green-100"
+                                  title="Add duplicate row"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteCreditCardExpense(index)}
+                                  className="text-red-600 hover:bg-red-100"
+                                  title="Delete row"
+                                >
+                                  <Trash2 className="w-4 h-4" />
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))}
