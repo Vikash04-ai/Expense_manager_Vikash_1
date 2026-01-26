@@ -98,6 +98,57 @@ const ExpenseTracker = () => {
     ])
   }
 
+  const handleAddOtherExpenseFromCreditCard = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setOtherExpenses((prev) => [
+      ...prev,
+      {
+        OtherExpense: expense.ExpenseOn,
+        OtherExpenseDate: expense.ExpenseDate,
+        OtherPayment: expense.ExpenseAmount,
+      },
+    ])
+  }
+
+  const handleAddRepaymentFromCreditCard = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setRepayments((prev) => [
+      ...prev,
+      {
+        RepayDate: expense.ExpenseDate,
+        RepayAmount: expense.ExpenseAmount,
+      },
+    ])
+  }
+
+  const handleAddChitPaymentFromCreditCard = (index: number) => {
+    const expense = creditCardExpenses[index]
+    setChitPayments((prev) => [
+      ...prev,
+      {
+        ChitDate: expense.ExpenseDate,
+        ChitPayment: expense.ExpenseAmount,
+      },
+    ])
+  }
+
+  // Other Expense Handlers (with date)
+  const handleAddOtherExpense = () => {
+    if (!otherExpense.OtherExpense || !otherExpense.OtherExpenseDate || !otherExpense.OtherPayment) {
+      alert("Please fill in all fields for Other Expense")
+      return
+    }
+    setOtherExpenses((prev) => [
+      ...prev,
+      {
+        OtherExpense: otherExpense.OtherExpense,
+        OtherExpenseDate: formatDate(otherExpense.OtherExpenseDate),
+        OtherPayment: otherExpense.OtherPayment,
+      },
+    ])
+    setOtherExpense({ OtherExpense: "", OtherExpenseDate: undefined, OtherPayment: "" })
+  }
+
   // Repayment Handlers
   const handleAddRepayment = () => {
     if (!repayment.RepayDate || !repayment.RepayAmount) {
@@ -128,23 +179,6 @@ const ExpenseTracker = () => {
       },
     ])
     setChitPayment({ ChitDate: undefined, ChitPayment: "" })
-  }
-
-  // Other Expense Handlers (with date)
-  const handleAddOtherExpense = () => {
-    if (!otherExpense.OtherExpense || !otherExpense.OtherExpenseDate || !otherExpense.OtherPayment) {
-      alert("Please fill in all fields for Other Expense")
-      return
-    }
-    setOtherExpenses((prev) => [
-      ...prev,
-      {
-        OtherExpense: otherExpense.OtherExpense,
-        OtherExpenseDate: formatDate(otherExpense.OtherExpenseDate),
-        OtherPayment: otherExpense.OtherPayment,
-      },
-    ])
-    setOtherExpense({ OtherExpense: "", OtherExpenseDate: undefined, OtherPayment: "" })
   }
 
   // Submit All Data
@@ -409,16 +443,37 @@ const ExpenseTracker = () => {
                               ₹{expense.ExpenseAmount}
                             </TableCell>
                             <TableCell className="text-sm">
-                              <div className="flex gap-2 justify-center">
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleDuplicateCreditCardExpense(index)}
-                                  className="text-green-600 hover:bg-green-100"
-                                  title="Add duplicate row"
-                                >
-                                  <Plus className="w-4 h-4" />
-                                </Button>
+                              <div className="flex gap-1 justify-center flex-wrap">
+                                <div className="relative group">
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-green-600 hover:bg-green-100"
+                                    title="Add expense"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                  </Button>
+                                  <div className="absolute left-0 mt-1 w-32 bg-white border border-gray-200 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity z-10 hidden group-hover:block">
+                                    <button
+                                      onClick={() => handleAddOtherExpenseFromCreditCard(index)}
+                                      className="block w-full text-left px-3 py-2 text-sm hover:bg-green-50 rounded-t-lg first:rounded-t-lg"
+                                    >
+                                      Add Other
+                                    </button>
+                                    <button
+                                      onClick={() => handleAddRepaymentFromCreditCard(index)}
+                                      className="block w-full text-left px-3 py-2 text-sm hover:bg-green-50"
+                                    >
+                                      Add Repay
+                                    </button>
+                                    <button
+                                      onClick={() => handleAddChitPaymentFromCreditCard(index)}
+                                      className="block w-full text-left px-3 py-2 text-sm hover:bg-green-50 rounded-b-lg"
+                                    >
+                                      Add Chit
+                                    </button>
+                                  </div>
+                                </div>
                                 <Button
                                   variant="ghost"
                                   size="sm"
