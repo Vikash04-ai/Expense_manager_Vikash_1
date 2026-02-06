@@ -307,6 +307,28 @@ const ExpenseTracker = () => {
     }
   }
 
+  // Test SheetDB Connection
+  const handleTestSheetDB = async () => {
+    setIsSubmitting(true)
+    try {
+      console.log("[v0] Testing SheetDB connection...")
+      const response = await fetch("/api/test-sheetdb")
+      const result = await response.json()
+      console.log("[v0] Test Result:", result)
+
+      if (response.ok) {
+        alert("✓ SheetDB connection is working!\n\nResponse: " + JSON.stringify(result, null, 2))
+      } else {
+        alert("✗ SheetDB connection failed!\n\nError: " + JSON.stringify(result, null, 2))
+      }
+    } catch (error) {
+      console.error("[v0] Test Error:", error)
+      alert("✗ Connection test failed: " + String(error))
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 p-4 sm:p-8">
       <Card className="w-full max-w-6xl mx-auto shadow-2xl">
@@ -826,7 +848,15 @@ const ExpenseTracker = () => {
           </Tabs>
 
           {/* Submit Button */}
-          <div className="flex justify-end mt-10">
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-end mt-10">
+            <Button
+              onClick={handleTestSheetDB}
+              variant="outline"
+              className="w-full sm:w-auto"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "Testing..." : "🧪 Test SheetDB Connection"}
+            </Button>
             <Button
               onClick={handleSubmitAll}
               className="w-full sm:w-auto bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-8 rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
