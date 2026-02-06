@@ -194,7 +194,7 @@ const ExpenseTracker = () => {
     setChitPayments((prev) => prev.filter((_, i) => i !== index))
   }
 
-  // Submit All Data - Export to Excel
+  // Submit All Data to SheetDB
   const handleSubmitAll = async () => {
     if (
       creditCardExpenses.length === 0 &&
@@ -276,84 +276,32 @@ const ExpenseTracker = () => {
         })
       })
 
-      // Try to export to Excel using xlsx library if available
-      const exportToExcel = async () => {
-        try {
-          const XLSX = await import("xlsx")
-          
-          // Create a worksheet from the data
-          const worksheet = XLSX.utils.json_to_sheet(formattedData)
-          
-          // Set column widths
-          const columnWidths = [
-            { wch: 20 }, // Expense on
-            { wch: 15 }, // Expense Date
-            { wch: 15 }, // Expense Amount
-            { wch: 15 }, // Repay Date
-            { wch: 15 }, // Repay Amount
-            { wch: 15 }, // Chit Date
-            { wch: 15 }, // Chit Payment
-            { wch: 20 }, // Other Expense
-            { wch: 18 }, // Other Expense Date
-            { wch: 15 }, // Other Payment
-          ]
-          worksheet["!cols"] = columnWidths
-          
-          // Create a workbook and add the worksheet
-          const workbook = XLSX.utils.book_new()
-          XLSX.utils.book_append_sheet(workbook, worksheet, "Expenses")
-          
-          // Generate file name with current date
-          const date = new Date()
-          const fileName = `Expenses_${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}.xlsx`
-          
-          // Write the file
-          XLSX.writeFile(workbook, fileName)
-          
-          return true
-        } catch (error) {
-          console.log("[v0] XLSX not available, will use CSV fallback:", error)
-          return false
-        }
-      }
+      console.log("[v0] Submitting data to SheetDB:", JSON.stringify({ data: formattedData }, null, 2))
 
-      const excelExported = await exportToExcel()
+      // Send data to our API endpoint which forwards to SheetDB
+      const response = await fetch("/api/submit-expenses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ data: formattedData }),
+      })
 
-      if (excelExported) {
-        alert("Data exported successfully to Excel!")
+      const result = await response.json()
+      console.log("[v0] API Response:", result)
+
+      if (response.ok) {
+        alert("Data submitted successfully to Google Sheets!")
         setCreditCardExpenses([])
         setRepayments([])
         setChitPayments([])
         setOtherExpenses([])
       } else {
-        // Fallback to CSV if xlsx is not available
-        const headers = Object.keys(formattedData[0] || {})
-        const csvContent = [
-          headers.join(","),
-          ...formattedData.map((row) =>
-            headers
-              .map((header) => {
-                const value = row[header] || ""
-                return `"${String(value).replace(/"/g, '""')}"`
-              })
-              .join(",")
-          ),
-        ].join("\n")
-
-        const link = document.createElement("a")
-        link.href = `data:text/csv;charset=utf-8,${encodeURIComponent(csvContent)}`
-        link.download = `Expenses_${new Date().toISOString().split("T")[0]}.csv`
-        link.click()
-
-        alert("Data exported to CSV file! (Install xlsx library for Excel format)")
-        setCreditCardExpenses([])
-        setRepayments([])
-        setChitPayments([])
-        setOtherExpenses([])
+        alert("Error submitting data: " + (result.error || "Unknown error"))
       }
     } catch (error) {
-      console.error("[v0] Error exporting data:", error)
-      alert("Error exporting data. Check console for details.")
+      console.error("[v0] Error submitting data:", error)
+      alert("Error submitting data. Check console for details.")
     } finally {
       setIsSubmitting(false)
     }
