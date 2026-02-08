@@ -276,7 +276,8 @@ const ExpenseTracker = () => {
         })
       })
 
-      console.log("Sending data to SheetDB:", JSON.stringify({ data: formattedData }, null, 2))
+      console.log("[v0] Submitting data with record count:", formattedData.length)
+      console.log("[v0] Sending data to SheetDB:", JSON.stringify({ data: formattedData }, null, 2))
 
       const response = await fetch("https://sheetdb.io/api/v1/si5qkk2bym6hc", {
         method: "POST",
@@ -286,8 +287,9 @@ const ExpenseTracker = () => {
         body: JSON.stringify({ data: formattedData }),
       })
 
+      console.log("[v0] Response status:", response.status, response.statusText)
       const result = await response.json()
-      console.log("SheetDB Response:", result)
+      console.log("[v0] SheetDB Response:", result)
 
       if (response.ok) {
         alert("Data submitted successfully to Google Sheets!")
@@ -296,11 +298,17 @@ const ExpenseTracker = () => {
         setChitPayments([])
         setOtherExpenses([])
       } else {
-        alert("Error submitting data: " + (result.error || "Unknown error"))
+        const errorMessage = result.error || result.message || "Unknown error from server"
+        console.error("[v0] Server error response:", errorMessage)
+        alert(`Error submitting data: ${errorMessage}`)
       }
     } catch (error) {
-      console.error("Error:", error)
-      alert("Error submitting data. Check console for details.")
+      console.error("[v0] Network/Parse Error:", error)
+      if (error instanceof Error) {
+        alert(`Error submitting data: ${error.message}`)
+      } else {
+        alert("Error submitting data. Check console for details.")
+      }
     } finally {
       setIsSubmitting(false)
     }
