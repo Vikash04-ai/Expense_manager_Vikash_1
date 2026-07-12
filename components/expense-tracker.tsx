@@ -323,7 +323,7 @@ const ExpenseTracker = () => {
         <CardContent className="pt-8">
           <Tabs defaultValue="credit-card-expense" className="w-full">
             {/* Enhanced Tabs */}
-            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 mb-10 bg-gray-100 p-2 rounded-lg">
+            <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 gap-2 mb-10 bg-gray-100 p-2 rounded-lg pb-54">
               <TabsTrigger
                 value="credit-card-expense"
                 className="text-xs sm:text-sm py-3 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600 data-[state=active]:to-purple-700 data-[state=active]:text-white"
